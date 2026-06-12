@@ -5,13 +5,13 @@ A fun "Find the Frog" game where you search for hidden frogs among lily pads! Wh
 ## How to Play
 
 1. Click on the lily pads (🍃) to reveal what's underneath
-2. Find all 5 frogs (🐸) hidden in the grid
+2. Find 10 frogs (🐸) hidden in the grid
 3. Track your attempts and time
 4. When you find all frogs, you'll see the victory screen with a SoundCloud barcode!
 
 ## Features
 
-- 🎮 Interactive 5x4 grid gameplay
+- 🎮 Interactive 15x15 grid gameplay
 - ⏱️ Timer to track your speed
 - 📊 Statistics tracking (attempts, time, frogs found)
 - 🎨 Beautiful gradient design with animations
