@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find the Frog</title>
+    <title>🐸Find the Frog🐸</title>
     <style>
         body {
             margin: 0;
@@ -14,119 +14,86 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            /* Allow scrolling since grid is large */
-            overflow: auto; 
         }
 
         h1 {
-            color: #00695c;
+            color: #006064;
             margin-bottom: 10px;
         }
 
         .stats {
             font-size: 1.2rem;
             margin-bottom: 20px;
-            color: #004d40;
-            background: rgba(255, 255, 255, 0.6);
+            color: #00838f;
+            background: white;
             padding: 10px 20px;
             border-radius: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* Grid Container */
+        /* Grid Container - Fixed Size based on 60px tiles */
         #game-grid {
             display: grid;
-            /* 30 columns, each exactly 60px */
-            grid-template-columns: repeat(30, 60px);
-            /* 12 rows, each exactly 60px */
-            grid-template-rows: repeat(12, 60px);
-            gap: 4px;
-            background-color: #b2ebf2;
+            grid-template-columns: repeat(26, 60px);
+            grid-template-rows: repeat(10, 60px);
+            gap: 5px;
+            background-color: #4dd0e1;
             padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            /* Ensure the grid doesn't shrink */
-            width: max-content; 
-            height: max-content;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            /* Allow scrolling if screen is too small */
+            overflow: auto; 
+            max-width: 95vw;
+            max-height: 80vh;
         }
 
         .tile {
             width: 60px;
             height: 60px;
-            background-color: #4caf50;
+            background-color: #66bb6a; /* Lily pad green */
             cursor: pointer;
             position: relative;
-            transition: transform 0.1s, background-color 0.3s;
+            transition: transform 0.2s, background-color 0.3s;
             
-            /* Lily Pad Shape using clip-path */
-            /* Creates a circle with a wedge cut out for the stem/notch */
-            clip-path: polygon(
-                50% 50%, 
-                0% 0%, 
-                100% 0%, 
-                100% 100%, 
-                0% 100%, 
-                0% 0%, 
-                50% 50%,
-                /* This creates the notch effect by manipulating the circle approximation or using a specific path */
-                /* Simpler approach for CSS only circle with notch: */
-                50% 50%
-            );
-            /* Better Lily Pad Shape using radial gradient and clip-path */
-            border-radius: 50%;
-            /* Cut out the notch */
-            clip-path: polygon(
-                50% 50%,
-                0% 0%,
-                100% 0%,
-                100% 100%,
-                0% 100%,
-                0% 0%,
-                50% 50%,
-                25% 25%,
-                50% 50%,
-                75% 25%
-            );
-            /* Actually, let's use a cleaner CSS shape for a lily pad */
-            background: #4caf50;
-            clip-path: path('M30 0 C13.4 0 0 13.4 0 30 C0 46.6 13.4 60 30 60 C46.6 60 60 46.6 60 30 C60 13.4 46.6 0 30 0 Z M30 30 L15 15 L30 30 L45 15 Z');
-            /* Fallback if path not supported perfectly in all contexts, but standard modern browsers handle it */
-            /* Let's stick to a simpler CSS-only notch for maximum compatibility */
-            clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 50% 50%, 20% 20%, 50% 50%, 80% 20%);
-            
-            /* Refined Lily Pad Clip Path */
-            clip-path: path('M30 5 C16 5 5 16 5 30 C5 44 16 55 30 55 C44 55 55 44 55 30 C55 16 44 5 30 5 M30 30 L15 18 L30 30 L45 18 Z');
-            
+            /* Create Lily Pad Shape using clip-path */
+            /* Circle with a wedge cut out for the notch */
+            clip-path: path('M 30 0 A 30 30 0 1 1 29.9 0 L 30 30 Z'); 
+            /* Fallback for older browsers if needed, but path is robust */
+            border-radius: 50%; 
+        }
+
+        /* Rotate the notch to the top for all tiles */
+        .tile {
+            transform: rotate(-90deg);
+        }
+
+        .tile:hover {
+            transform: scale(1.1) rotate(-90deg);
+            z-index: 10;
+        }
+
+        .tile.revealed {
+            cursor: default;
+            transform: rotate(-90deg); /* Maintain rotation */
+        }
+
+        .tile.frog {
+            background-color: #43a047;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            user-select: none;
+            font-size: 35px;
         }
 
-        /* Hover effect */
-        .tile:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-        }
-
-        /* Revealed Water (No Frog) */
         .tile.water {
-            background-color: #29b6f6;
-            cursor: default;
-            clip-path: none; /* Remove lily pad shape to look like water? Or keep it as a sunken pad? Let's keep shape but change color */
-            /* Keeping the shape but making it look like water */
-            clip-path: path('M30 5 C16 5 5 16 5 30 C5 44 16 55 30 55 C44 55 55 44 55 30 C55 16 44 5 30 5 M30 30 L15 18 L30 30 L45 18 Z');
+            background-color: #29b6f6; /* Water blue */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
         }
 
-        /* Revealed Frog */
-        .tile.frog {
-            background-color: #8bc34a;
-            cursor: default;
-            clip-path: path('M30 5 C16 5 5 16 5 30 C5 44 16 55 30 55 C44 55 55 44 55 30 C55 16 44 5 30 5 M30 30 L15 18 L30 30 L45 18 Z');
-        }
-
-        /* Victory Screen Overlay */
+        /* Victory Modal */
         #victory-screen {
             display: none;
             position: fixed;
@@ -135,10 +102,10 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+            z-index: 1000;
             color: white;
             text-align: center;
         }
@@ -146,22 +113,21 @@
         #victory-screen h2 {
             font-size: 3rem;
             margin-bottom: 20px;
-            color: #81c784;
+            text-shadow: 0 0 10px #00e5ff;
         }
 
-        #spotify-code {
-            background-color: #8fbbca; /* Your SVG background color */
+        .spotify-code-container {
+            background: white;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-            max-width: 90%;
-            max-height: 80%;
+            border-radius: 20px;
+            margin-top: 20px;
+            animation: popIn 0.5s ease-out;
         }
 
-        #spotify-code svg {
-            width: 100%;
-            height: auto;
-            max-width: 600px;
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         button {
@@ -171,33 +137,32 @@
             background-color: #ff7043;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.3s;
         }
 
         button:hover {
             background-color: #f4511e;
         }
-
     </style>
 </head>
 <body>
 
     <h1>Find the Frog</h1>
     <div class="stats">
-        Frogs Found: <span id="score">0</span> / 10 &nbsp;|&nbsp; 
-        Attempts: <span id="attempts">0</span>
+        Frogs Found: <span id="found-count">0</span> / 10
     </div>
 
     <div id="game-grid"></div>
 
     <div id="victory-screen">
-        <h2>You Won!</h2>
-        <p>Scan the code below to listen!</p>
-        <div id="spotify-code">
+        <h2>🎉 You Won! 🎉</h2>
+        <p>Scan this code to listen to the victory track!</p>
+        
+        <div class="spotify-code-container">
             <!-- Your Spotify Code SVG -->
-            <svg width="640" height="160" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <rect x="0" y="0" width="400" height="100" fill="#8fbbca"/>
                 <rect x="100.00" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="112.42" y="23.50" width="6.71" height="53.00" rx="3.36" ry="3.36" fill="#000000"/>
@@ -222,31 +187,30 @@
                 <rect x="348.44" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="360.87" y="20.00" width="6.71" height="60.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="373.29" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
-                <g transform="translate(20,20)"><path fill="#000000" d="M31.1897 0.0240432C14.6347 -0.632948 0.681043 12.2549 0.024052 28.8097C-0.633075 45.3665 12.2553 59.319 28.8103 59.976C45.366 60.633 59.3188 47.7458 59.976 31.1893C60.633 14.6343 47.7453 0.681005 31.1897 0.0240432ZM43.8535 43.9722C43.4793 44.6292 42.7525 44.9595 42.0468 44.8602C41.829 44.8298 41.6135 44.7582 41.4105 44.6427C37.4455 42.3855 33.1242 40.9165 28.5667 40.276C24.0095 39.6355 19.4507 39.8565 15.0169 40.9335C14.0555 41.1667 13.0871 40.5768 12.8536 39.6155C12.6202 38.654 13.2103 37.6857 14.1715 37.452C19.0471 36.2682 24.058 36.0247 29.0655 36.7285C34.073 37.4322 38.8228 39.0475 43.1828 41.5293C44.0425 42.0187 44.3428 43.1125 43.8535 43.9722ZM47.7962 36.0967C47.1842 37.2277 45.771 37.6495 44.6403 37.037C39.9998 34.527 34.9767 32.879 29.7105 32.139C24.4443 31.3988 19.1614 31.5982 14.0087 32.732C13.7298 32.7935 13.4517 32.8022 13.1846 32.7647C12.2487 32.633 11.4492 31.9355 11.2343 30.9585C10.958 29.7025 11.752 28.4602 13.008 28.184C18.7039 26.9305 24.5416 26.7097 30.3585 27.5272C36.1758 28.3447 41.7262 30.1663 46.8558 32.941C47.987 33.5527 48.408 34.9657 47.7962 36.0967ZM52.1663 27.2192C51.5905 28.3263 50.3935 28.9 49.2245 28.7358C48.9105 28.6915 48.5987 28.5942 48.3012 28.4398C42.8988 25.6305 37.0798 23.7731 31.006 22.9195C24.9326 22.0659 18.8271 22.2474 12.8592 23.4587C11.3078 23.7732 9.79528 22.7712 9.48055 21.2201C9.16582 19.669 10.1679 18.1563 11.7191 17.8414C18.3266 16.5002 25.084 16.2991 31.8038 17.2435C38.5238 18.188 44.9642 20.2439 50.9457 23.3543C52.35 24.0846 52.8963 25.815 52.1663 27.2192Z"/></g>
+                <g transform="translate(20,20)"><path fill="#000000" d="M31.1897 0.0240432C14.6347 -0.632948 0.681043 12.2549 0.024052 28.8097C-0.633075 45.3665 12.2553 59.319 28.8103 59.976C45.366 60.633 59.3188 47.7458 59.976 31.1893C60.633 14.6343 47.7453 0.681005 31.1897 0.0240432ZM43.8535 43.9722C43.4793 44.6292 42.7525 44.9595 42.0468 44.8602C41.829 44.8298 41.6135 44.7582 41.4105 44.6427C37.4455 42.3855 33.1242 40.9165 28.5667 40.276C24.0095 39.6355 19.4507 39.8565 15.0169 40.9335C14.0555 41.1667 13.0871 40.5768 12.8536 39.6155C12.6202 38.654 13.2103 37.6857 14.1715 37.452C19.0471 36.2682 24.058 36.0247 29.0655 36.7285C34.073 37.4322 38.8228 39.0475 43.1828 41.5293C44.0425 42.0187 44.3428 43.1125 43.8535 43.9722ZM47.7962 36.0967C47.1842 37.2277 45.771 37.6495 44.6403 37.037C39.9998 34.527 34.9767 32.879 29.7105 32.139C24.4443 31.3988 19.1614 31.5982 14.0087 32.732C13.7298 32.7935 13.4517 32.8022 13.1846 32.7647C12.2487 32.633 11.4492 31.9355 11.2343 30.9585C10.958 29.7025 11.752 28.4602 13.008 28.184C18.7039 26.9305 24.5416 26.7097 29.0655 27.5272C34.073 28.3447 38.8228 29.0475 43.1828 31.5293C44.0425 32.0187 44.3428 33.1125 43.8535 33.9722ZM52.1663 27.2192C51.5905 28.3263 50.3935 28.9 49.2245 28.7358C48.9105 28.6915 48.5987 28.5942 48.3012 28.4398C42.8988 25.6305 37.0798 23.7731 31.006 22.9195C24.9326 22.0659 18.8271 22.2474 12.8592 23.4587C11.3078 23.7732 9.79528 22.7712 9.48055 21.2201C9.16582 19.669 10.1679 18.1563 11.7191 17.8414C18.3266 16.5002 25.084 16.2991 31.8038 17.2435C38.5238 18.188 44.9642 20.2439 50.9457 23.3543C52.35 24.0846 52.8963 25.815 52.1663 27.2192Z"/></g>
             </svg>
         </div>
+
         <button onclick="location.reload()">Play Again</button>
     </div>
 
     <script>
-        const ROWS = 12;
-        const COLS = 30;
+        const ROWS = 10;
+        const COLS = 26;
         const TOTAL_FROGS = 50;
         const GOAL = 10;
-
+        
         let frogsFound = 0;
-        let attempts = 0;
+        let gameOver = false;
         let frogLocations = new Set();
-        let gameActive = true;
 
         const gridElement = document.getElementById('game-grid');
-        const scoreElement = document.getElementById('score');
-        const attemptsElement = document.getElementById('attempts');
+        const foundCountElement = document.getElementById('found-count');
         const victoryScreen = document.getElementById('victory-screen');
 
         // Initialize Game
         function initGame() {
-            // Generate random frog locations
+            // Generate unique random locations for frogs
             while (frogLocations.size < TOTAL_FROGS) {
                 const r = Math.floor(Math.random() * ROWS);
                 const c = Math.floor(Math.random() * COLS);
@@ -261,42 +225,37 @@
                     tile.dataset.row = r;
                     tile.dataset.col = c;
                     
-                    // Add click event
                     tile.addEventListener('click', () => handleTileClick(tile, r, c));
-                    
                     gridElement.appendChild(tile);
                 }
             }
         }
 
         function handleTileClick(tile, r, c) {
-            if (!gameActive || tile.classList.contains('revealed')) return;
+            if (gameOver || tile.classList.contains('revealed')) return;
 
-            attempts++;
-            attemptsElement.textContent = attempts;
             tile.classList.add('revealed');
-
             const key = `${r},${c}`;
 
             if (frogLocations.has(key)) {
-                // Found a frog!
+                // Frog Found
                 tile.classList.add('frog');
                 tile.textContent = '🐸';
                 frogsFound++;
-                scoreElement.textContent = frogsFound;
+                foundCountElement.textContent = frogsFound;
 
                 if (frogsFound >= GOAL) {
                     endGame();
                 }
             } else {
-                // No frog (Water)
+                // No Frog (Water Drop)
                 tile.classList.add('water');
                 tile.textContent = '💧';
             }
         }
 
         function endGame() {
-            gameActive = false;
+            gameOver = true;
             setTimeout(() => {
                 victoryScreen.style.display = 'flex';
             }, 500);
