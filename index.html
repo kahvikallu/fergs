@@ -18,7 +18,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow: auto;
+            padding: 20px;
         }
 
         .game-container {
@@ -51,9 +52,8 @@
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            max-width: 600px;
+            gap: 8px;
+            max-width: 100%;
             margin: 0 auto;
             background: rgba(255,255,255,0.2);
             padding: 20px;
@@ -62,8 +62,6 @@
         }
 
         .leaf {
-            width: 80px;
-            height: 80px;
             background: linear-gradient(135deg, #58d68d, #2ecc71);
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             cursor: pointer;
@@ -71,9 +69,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.5em;
+            font-size: 2em;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             position: relative;
+        }
+
+        /* Lily pad notch */
+        .leaf::before {
+            content: '';
+            position: absolute;
+            top: -5%;
+            right: 10%;
+            width: 25%;
+            height: 25%;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-bottom-left-radius: 50%;
+            z-index: 2;
+            transform: rotate(-45deg);
         }
 
         .leaf:hover {
@@ -115,7 +127,7 @@
 
         .spotify-code-container {
             width: 400px;
-            height: 150px;
+            height: 100px;
             margin: 20px auto;
             background: #8fbbca;
             padding: 20px;
@@ -164,34 +176,15 @@
         .hidden {
             display: none !important;
         }
-
-        /* Responsive design */
-        @media (max-width: 600px) {
-            .game-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-                padding: 15px;
-            }
-
-            .leaf {
-                width: 60px;
-                height: 60px;
-                font-size: 2em;
-            }
-
-            h1 {
-                font-size: 1.8em;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <h1>🐸 Find the Frog!</h1>
-        
+
         <div id="gameScreen">
             <div class="info-bar">
-                <span>Frogs Found: <span id="foundCount">0</span>/<span id="totalFrogs">5</span></span>
+                <span>Frogs Found: <span id="foundCount">0</span>/<span id="totalFrogs">10</span></span>
                 <span>Attempts: <span id="attemptCount">0</span></span>
                 <span>Time: <span id="timer">0</span>s</span>
             </div>
@@ -202,10 +195,9 @@
         <div id="finalScreen" class="final-screen">
             <h2>🎉 Congratulations! 🎉</h2>
             <p>You found all the frogs!</p>
-            
+
             <div class="spotify-code-container">
-                <!-- Spotify Code SVG -->
-                <svg width="640" height="160" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <rect x="0" y="0" width="400" height="100" fill="#8fbbca"/>
 <rect x="100.00" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
 <rect x="112.42" y="23.50" width="6.71" height="53.00" rx="3.36" ry="3.36" fill="#000000"/>
@@ -237,7 +229,7 @@
             <div class="stats">
                 <p><strong>Total Attempts:</strong> <span id="finalAttempts">0</span></p>
                 <p><strong>Time Taken:</strong> <span id="finalTime">0</span> seconds</p>
-                <p><strong>Frogs Found:</strong> <span id="finalFrogs">5</span></p>
+                <p><strong>Frogs Found:</strong> <span id="finalFrogs">10</span></p>
             </div>
 
             <button class="play-again" onclick="restartGame()">Play Again</button>
@@ -246,9 +238,13 @@
 
     <script>
         // Game configuration
-        const GRID_SIZE = 20; // 5x4 grid
-        const TOTAL_FROGS = 5;
-        
+        const GRID_SIZE = 15; // 15x15 grid
+        const TOTAL_FROGS = 30; // Total frogs hidden on grid
+        const GOAL_FROGS = 10; // Frogs needed to win
+        const TILE_BASE_SIZE = 50;
+        const SCALE_FACTOR = 1.25;
+        const TILE_SIZE = TILE_BASE_SIZE * SCALE_FACTOR; // 62.5px
+
         // Game state
         let frogsFound = 0;
         let attempts = 0;
@@ -264,11 +260,11 @@
             gameTime = 0;
             clickedLeaves.clear();
             frogPositions = generateFrogPositions();
-            
+
             updateDisplay();
             createGrid();
             startTimer();
-            
+
             document.getElementById('gameScreen').classList.remove('hidden');
             document.getElementById('finalScreen').style.display = 'none';
         }
@@ -276,8 +272,9 @@
         // Generate random frog positions
         function generateFrogPositions() {
             const positions = new Set();
+            const totalCells = GRID_SIZE * GRID_SIZE;
             while (positions.size < TOTAL_FROGS) {
-                positions.add(Math.floor(Math.random() * GRID_SIZE));
+                positions.add(Math.floor(Math.random() * totalCells));
             }
             return Array.from(positions);
         }
@@ -286,12 +283,16 @@
         function createGrid() {
             const grid = document.getElementById('gameGrid');
             grid.innerHTML = '';
-            
-            for (let i = 0; i < GRID_SIZE; i++) {
+            grid.style.gridTemplateColumns = `repeat(${GRID_SIZE}, ${TILE_SIZE}px)`;
+            grid.style.gap = '8px';
+
+            for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                 const leaf = document.createElement('div');
                 leaf.className = 'leaf';
+                leaf.style.width = `${TILE_SIZE}px`;
+                leaf.style.height = `${TILE_SIZE}px`;
                 leaf.dataset.index = i;
-                leaf.textContent = '🍃';
+                leaf.textContent = '';
                 leaf.onclick = () => clickLeaf(i, leaf);
                 grid.appendChild(leaf);
             }
@@ -299,37 +300,38 @@
 
         // Handle leaf click
         function clickLeaf(index, leafElement) {
-            if (clickedLeaves.has(index) || frogsFound >= TOTAL_FROGS) return;
-            
+            if (clickedLeaves.has(index) || frogsFound >= GOAL_FROGS) return;
+
             clickedLeaves.add(index);
             attempts++;
             leafElement.classList.add('clicked');
-            
+
             if (frogPositions.includes(index)) {
                 // Found a frog!
                 leafElement.textContent = '🐸';
                 leafElement.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
                 frogsFound++;
-                
+
                 // Check if game is won
-                if (frogsFound >= TOTAL_FROGS) {
+                if (frogsFound >= GOAL_FROGS) {
                     endGame();
                 }
             } else {
                 // No frog here
                 setTimeout(() => {
-                    leafElement.textContent = '✓';
-                    leafElement.style.opacity = '0.6';
-                }, 300);
+                    leafElement.textContent = '';
+                    leafElement.style.opacity = '0.7';
+                    leafElement.style.background = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
+                }, 200);
             }
-            
+
             updateDisplay();
         }
 
         // Update display counters
         function updateDisplay() {
             document.getElementById('foundCount').textContent = frogsFound;
-            document.getElementById('totalFrogs').textContent = TOTAL_FROGS;
+            document.getElementById('totalFrogs').textContent = GOAL_FROGS;
             document.getElementById('attemptCount').textContent = attempts;
             document.getElementById('timer').textContent = gameTime;
         }
@@ -345,12 +347,12 @@
         // End the game
         function endGame() {
             clearInterval(timerInterval);
-            
+
             // Update final screen stats
             document.getElementById('finalAttempts').textContent = attempts;
             document.getElementById('finalTime').textContent = gameTime;
-            document.getElementById('finalFrogs').textContent = TOTAL_FROGS;
-            
+            document.getElementById('finalFrogs').textContent = GOAL_FROGS;
+
             // Show final screen
             setTimeout(() => {
                 document.getElementById('gameScreen').classList.add('hidden');
