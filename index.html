@@ -14,7 +14,7 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow: auto; /* Allow scrolling for large grids */
+            user-select: none;
         }
 
         h1 {
@@ -32,122 +32,119 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        #game-container {
+        /* Grid Container */
+        #game-board {
             display: grid;
-            grid-template-columns: repeat(15, 75px);
-            grid-template-rows: repeat(15, 75px);
-            gap: 8px;
-            padding: 20px;
+            grid-template-columns: repeat(15, 60px);
+            grid-template-rows: repeat(15, 60px);
+            gap: 4px;
             background-color: #b2dfdb;
+            padding: 10px;
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
 
+        /* Lily Pad Tile */
         .tile {
-            width: 75px;
-            height: 75px;
-            background-color: #4caf50;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* Lily pad shape base */
-            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            background-color: #66bb6a; /* Light Green */
             position: relative;
-            transition: transform 0.2s, background-color 0.3s;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+            
+            /* Make it roundish like a lily pad */
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            
+            /* The Notch */
+            clip-path: polygon(
+                0% 50%, 
+                0% 100%, 
+                100% 100%, 
+                100% 50%, 
+                100% 0%, 
+                0% 0%, 
+                0% 40%, 
+                25% 40%, 
+                25% 50%, 
+                0% 50%
+            );
+            
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            user-select: none;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.2);
+            font-size: 30px;
         }
 
-        /* The "Notch" of the lily pad */
-        .tile::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            right: 10px;
-            width: 25px;
-            height: 25px;
-            background-color: #e0f7fa; /* Matches body bg to create cutout illusion or use transparent if needed */
-            background-color: #b2dfdb; /* Matches container bg for better look */
-            border-top-left-radius: 50%;
-            z-index: 2;
-            pointer-events: none;
-        }
-        
-        /* Fix notch color if body bg differs, but here we match container for consistency */
-        
         .tile:hover {
             transform: scale(1.05);
-            background-color: #66bb6a;
+            z-index: 10;
         }
 
-        .tile.found {
+        /* Revealed Water (No Frog) */
+        .tile.revealed-water {
+            background-color: #29b6f6; /* Water Blue */
+            cursor: default;
+            transform: none;
+            /* Remove the notch clip for water or keep it? Let's keep shape but change color */
+        }
+
+        /* Revealed Frog */
+        .tile.revealed-frog {
             background-color: #81c784;
             cursor: default;
             transform: none;
         }
 
-        .tile.found::after {
-             background-color: #b2dfdb;
-        }
-
-        .frog-icon {
-            display: none;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 3;
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        /* Victory Modal */
-        #victory-modal {
+        /* Victory Screen Overlay */
+        #victory-screen {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: white;
+            z-index: 100;
             text-align: center;
         }
 
-        #victory-modal h2 {
+        #victory-screen h2 {
             font-size: 3rem;
             margin-bottom: 20px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            color: #81c784;
+            text-shadow: 0 0 10px #81c784;
         }
 
-        .spotify-code-container {
-            background-color: #8fbbca; /* Match your SVG background */
+        #spotify-code {
+            background: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 0 30px rgba(143, 187, 202, 0.4);
-            animation: slideUp 0.6s ease-out;
+            box-shadow: 0 0 30px rgba(143, 187, 202, 0.5);
+            max-width: 90%;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        #spotify-code svg {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
         }
 
         button {
             margin-top: 30px;
-            padding: 15px 30px;
+            padding: 12px 24px;
             font-size: 1.2rem;
             background-color: #ff7043;
             color: white;
             border: none;
-            border-radius: 50px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.2s;
         }
 
         button:hover {
@@ -161,17 +158,15 @@
     <h1>Find the Frog</h1>
     <div id="stats">Frogs Found: <span id="score">0</span> / 10</div>
 
-    <div id="game-container">
-        <!-- Grid generated by JS -->
-    </div>
+    <div id="game-board"></div>
 
-    <div id="victory-modal">
+    <div id="victory-screen">
         <h2>You Won!</h2>
-        <p style="font-size: 1.2rem; margin-bottom: 20px;">Scan this code to listen!</p>
+        <p>Scan the code below to listen:</p>
         
-        <div class="spotify-code-container">
-            <!-- Your Provided Spotify Code SVG -->
-            <svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <div id="spotify-code">
+            <!-- Your Spotify Code SVG -->
+            <svg width="640" height="160" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <rect x="0" y="0" width="400" height="100" fill="#8fbbca"/>
                 <rect x="100.00" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="112.42" y="23.50" width="6.71" height="53.00" rx="3.36" ry="3.36" fill="#000000"/>
@@ -207,59 +202,72 @@
         const gridSize = 15;
         const totalFrogs = 50;
         const goalFrogs = 10;
-        let foundCount = 0;
+        let frogsFound = 0;
         let frogLocations = new Set();
 
-        const container = document.getElementById('game-container');
+        const board = document.getElementById('game-board');
         const scoreDisplay = document.getElementById('score');
-        const victoryModal = document.getElementById('victory-modal');
+        const victoryScreen = document.getElementById('victory-screen');
 
         // Initialize Game
         function initGame() {
-            // Generate unique random locations for frogs
+            // Generate random frog locations
             while (frogLocations.size < totalFrogs) {
-                const index = Math.floor(Math.random() * (gridSize * gridSize));
-                frogLocations.add(index);
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+                frogLocations.add(`${row},${col}`);
             }
 
             // Create Grid
-            for (let i = 0; i < gridSize * gridSize; i++) {
-                const tile = document.createElement('div');
-                tile.classList.add('tile');
-                
-                // Add click event
-                tile.addEventListener('click', () => handleTileClick(tile, i));
-                
-                container.appendChild(tile);
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const tile = document.createElement('div');
+                    tile.classList.add('tile');
+                    tile.dataset.row = r;
+                    tile.dataset.col = c;
+                    
+                    tile.addEventListener('click', handleTileClick);
+                    board.appendChild(tile);
+                }
             }
         }
 
-        function handleTileClick(tile, index) {
-            if (tile.classList.contains('found')) return; // Already clicked
+        function handleTileClick(e) {
+            const tile = e.target;
+            
+            // Ignore if already clicked
+            if (tile.classList.contains('revealed-water') || tile.classList.contains('revealed-frog')) {
+                return;
+            }
 
-            tile.classList.add('found');
+            const r = tile.dataset.row;
+            const c = tile.dataset.col;
+            const key = `${r},${c}`;
 
-            if (frogLocations.has(index)) {
-                // Frog found!
-                tile.innerHTML = '<span class="frog-icon" style="display:block">🐸</span>';
-                foundCount++;
-                scoreDisplay.textContent = foundCount;
+            if (frogLocations.has(key)) {
+                // It's a frog!
+                tile.classList.add('revealed-frog');
+                tile.textContent = '🐸';
+                frogsFound++;
+                scoreDisplay.textContent = frogsFound;
 
-                if (foundCount >= goalFrogs) {
-                    setTimeout(showVictory, 500);
+                if (frogsFound >= goalFrogs) {
+                    setTimeout(showVictory, 300);
                 }
             } else {
-                // Empty lily pad (optional: could add a small splash effect or just leave empty)
-                // For now, it just stays green and disabled
+                // It's water!
+                tile.classList.add('revealed-water');
+                tile.textContent = '💧';
             }
         }
 
         function showVictory() {
-            victoryModal.style.display = 'flex';
+            victoryScreen.style.display = 'flex';
         }
 
         // Start
         initGame();
+
     </script>
 </body>
 </html>
