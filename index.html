@@ -5,165 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find the Frog</title>
     <style>
-        :root {
-            --bg-color: #e0f7fa;
-            --grid-bg: #b2ebf2;
-            --frog-color: #4caf50;
-            --lily-color: #81c784;
-            --text-color: #006064;
-            --bar-color: #8fbbca;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #e0f7fa;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            text-align: center;
+            overflow: auto; /* Allow scrolling for large grids */
         }
 
-        h1 { margin-bottom: 10px; }
-        
-        .stats {
+        h1 {
+            color: #00695c;
+            margin-bottom: 10px;
+        }
+
+        #stats {
             font-size: 1.2rem;
             margin-bottom: 20px;
-            background: white;
+            color: #004d40;
+            background: rgba(255, 255, 255, 0.8);
             padding: 10px 20px;
             border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Game Grid */
         #game-container {
             display: grid;
-            /* 15 columns */
-            grid-template-columns: repeat(15, 1fr); 
-            gap: 4px;
-            background-color: var(--grid-bg);
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            max-width: 95vw;
-            max-height: 95vw;
+            grid-template-columns: repeat(15, 75px);
+            grid-template-rows: repeat(15, 75px);
+            gap: 8px;
+            padding: 20px;
+            background-color: #b2dfdb;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
 
-        .cell {
-            width: 30px;
-            height: 30px;
-            background-color: var(--lily-color);
-            border-radius: 50%;
+        .tile {
+            width: 75px;
+            height: 75px;
+            background-color: #4caf50;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* Lily pad shape base */
             cursor: pointer;
+            position: relative;
             transition: transform 0.2s, background-color 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 40px;
             user-select: none;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.2);
         }
 
-        .cell:hover {
-            transform: scale(1.1);
-            filter: brightness(1.1);
+        /* The "Notch" of the lily pad */
+        .tile::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 10px;
+            width: 25px;
+            height: 25px;
+            background-color: #e0f7fa; /* Matches body bg to create cutout illusion or use transparent if needed */
+            background-color: #b2dfdb; /* Matches container bg for better look */
+            border-top-left-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        /* Fix notch color if body bg differs, but here we match container for consistency */
+        
+        .tile:hover {
+            transform: scale(1.05);
+            background-color: #66bb6a;
         }
 
-        .cell.found {
-            background-color: var(--frog-color);
+        .tile.found {
+            background-color: #81c784;
             cursor: default;
-            animation: pop 0.3s ease-out;
+            transform: none;
         }
 
-        .cell.empty {
-            background-color: #ccc;
-            cursor: not-allowed;
+        .tile.found::after {
+             background-color: #b2dfdb;
         }
 
-        @keyframes pop {
-            0% { transform: scale(0.5); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        /* Victory Screen */
-        #victory-screen {
+        .frog-icon {
             display: none;
-            flex-direction: column;
-            align-items: center;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            animation: fadeIn 0.5s;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 3;
         }
 
-        #victory-screen h2 {
-            color: #1DB954; /* Spotify Green */
+        @keyframes popIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Victory Modal */
+        #victory-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+        }
+
+        #victory-modal h2 {
+            font-size: 3rem;
             margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         .spotify-code-container {
-            margin-top: 20px;
+            background-color: #8fbbca; /* Match your SVG background */
             padding: 20px;
-            background: #fff;
-            border-radius: 10px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(143, 187, 202, 0.4);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            background-color: var(--text-color);
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: #ff7043;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
+            transition: background 0.3s;
         }
 
         button:hover {
-            opacity: 0.9;
+            background-color: #f4511e;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Responsive adjustments for mobile */
-        @media (max-width: 600px) {
-            .cell {
-                width: 20px;
-                height: 20px;
-                font-size: 14px;
-            }
-            #game-container {
-                gap: 2px;
-                padding: 5px;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <h1>Find the Frog 🐸</h1>
-    
-    <div id="game-ui">
-        <div class="stats">
-            Found: <span id="score">0</span> / <span id="goal">10</span> | 
-            Attempts: <span id="attempts">0</span>
-        </div>
-        <div id="game-container"></div>
+    <h1>Find the Frog</h1>
+    <div id="stats">Frogs Found: <span id="score">0</span> / 10</div>
+
+    <div id="game-container">
+        <!-- Grid generated by JS -->
     </div>
 
-    <div id="victory-screen">
-        <h2>You found all the frogs!</h2>
-        <p>Scan this code to listen to the victory track:</p>
+    <div id="victory-modal">
+        <h2>You Won!</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;">Scan this code to listen!</p>
         
         <div class="spotify-code-container">
-            <!-- Your Custom Spotify Code SVG -->
+            <!-- Your Provided Spotify Code SVG -->
             <svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <rect x="0" y="0" width="400" height="100" fill="#8fbbca"/>
                 <rect x="100.00" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
@@ -197,79 +204,58 @@
     </div>
 
     <script>
-        const GRID_SIZE = 15; // 15x15 Grid
-        const FROG_COUNT = 10; // Goal: 10 Frogs
-        
-        let frogsFound = 0;
-        let attempts = 0;
+        const gridSize = 15;
+        const totalFrogs = 50;
+        const goalFrogs = 10;
+        let foundCount = 0;
         let frogLocations = new Set();
-        let gameActive = true;
 
-        const gameContainer = document.getElementById('game-container');
-        const scoreEl = document.getElementById('score');
-        const attemptsEl = document.getElementById('attempts');
-        const goalEl = document.getElementById('goal');
-        const gameUI = document.getElementById('game-ui');
-        const victoryScreen = document.getElementById('victory-screen');
-
-        // Set goal display
-        goalEl.textContent = FROG_COUNT;
+        const container = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+        const victoryModal = document.getElementById('victory-modal');
 
         // Initialize Game
         function initGame() {
-            // Generate random unique locations for frogs
-            while(frogLocations.size < FROG_COUNT) {
-                const randomIndex = Math.floor(Math.random() * (GRID_SIZE * GRID_SIZE));
-                frogLocations.add(randomIndex);
+            // Generate unique random locations for frogs
+            while (frogLocations.size < totalFrogs) {
+                const index = Math.floor(Math.random() * (gridSize * gridSize));
+                frogLocations.add(index);
             }
 
             // Create Grid
-            for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.dataset.index = i;
-                cell.addEventListener('click', handleCellClick);
-                gameContainer.appendChild(cell);
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                
+                // Add click event
+                tile.addEventListener('click', () => handleTileClick(tile, i));
+                
+                container.appendChild(tile);
             }
         }
 
-        function handleCellClick(e) {
-            if (!gameActive) return;
-            
-            const cell = e.target;
-            const index = parseInt(cell.dataset.index);
+        function handleTileClick(tile, index) {
+            if (tile.classList.contains('found')) return; // Already clicked
 
-            // Prevent clicking same cell twice
-            if (cell.classList.contains('found') || cell.classList.contains('empty')) {
-                return;
-            }
-
-            attempts++;
-            attemptsEl.textContent = attempts;
+            tile.classList.add('found');
 
             if (frogLocations.has(index)) {
-                // Frog Found!
-                cell.textContent = '🐸';
-                cell.classList.add('found');
-                frogsFound++;
-                scoreEl.textContent = frogsFound;
+                // Frog found!
+                tile.innerHTML = '<span class="frog-icon" style="display:block">🐸</span>';
+                foundCount++;
+                scoreDisplay.textContent = foundCount;
 
-                if (frogsFound === FROG_COUNT) {
-                    endGame();
+                if (foundCount >= goalFrogs) {
+                    setTimeout(showVictory, 500);
                 }
             } else {
-                // Empty Lily Pad
-                cell.classList.add('empty');
-                cell.textContent = '💧';
+                // Empty lily pad (optional: could add a small splash effect or just leave empty)
+                // For now, it just stays green and disabled
             }
         }
 
-        function endGame() {
-            gameActive = false;
-            setTimeout(() => {
-                gameUI.style.display = 'none';
-                victoryScreen.style.display = 'flex';
-            }, 500);
+        function showVictory() {
+            victoryModal.style.display = 'flex';
         }
 
         // Start
