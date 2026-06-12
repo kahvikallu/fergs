@@ -11,7 +11,7 @@ A fun "Find the Frog" game where you search for hidden frogs among lily pads! Wh
 
 ## Features
 
-- 🎮 Interactive 5x4 grid gameplay
+- 🎮 Interactive 26x10 grid gameplay
 - ⏱️ Timer to track your speed
 - 📊 Statistics tracking (attempts, time, frogs found)
 - 🎨 Beautiful gradient design with animations
