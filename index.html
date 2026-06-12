@@ -8,97 +8,80 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #a2d9e8; /* Water color */
+            background-color: #e0f7fa; /* Light water blue */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: auto; /* Allow scrolling for large fixed grid */
+            overflow-x: auto; /* Allow horizontal scroll if needed */
+            overflow-y: auto;
         }
 
-        header {
+        h1 {
+            color: #00695c;
+            margin-top: 20px;
             text-align: center;
-            padding: 20px;
+            font-size: 2rem;
+        }
+
+        .stats {
+            margin: 10px 0;
+            font-size: 1.2rem;
             color: #004d40;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            text-align: center;
         }
 
-        h1 { margin: 0; font-size: 2.5rem; }
-        p { margin: 10px 0; font-size: 1.2rem; font-weight: bold; }
-
-        #game-container {
-            position: relative;
-            margin: 20px;
-            /* Grid dimensions: 26 cols * 60px = 1560px wide, 10 rows * 60px = 600px high */
-            width: 1560px; 
-            height: 600px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        #grid {
+        /* Game Container - Centered Horizontally */
+        .game-container {
             display: grid;
+            /* 26 columns * 60px = 1560px total width */
             grid-template-columns: repeat(26, 60px);
             grid-template-rows: repeat(10, 60px);
-            gap: 8px;
-            width: 100%;
-            height: 100%;
+            gap: 4px;
+            margin: 20px auto; /* Auto margins center it horizontally */
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .tile {
             width: 60px;
             height: 60px;
-            background-color: #4caf50;
+            background-color: #4caf50; /* Lily pad green */
             cursor: pointer;
             position: relative;
-            transition: transform 0.2s, background-color 0.3s;
-            
-            /* Lily Pad Shape */
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1);
-            
-            /* Center content */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 40px;
+            font-size: 40px; /* Icon size */
             user-select: none;
+            transition: transform 0.1s, background-color 0.3s;
+            
+            /* Make it look like a Lily Pad */
+            border-radius: 45% 45% 45% 45% / 55% 55% 45% 45%; /* Organic oval */
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         }
 
-        .tile::before {
-            /* The Notch in the Lily Pad */
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background-color: #a2d9e8; /* Match body background to look like a cutout */
-            clip-path: polygon(50% 100%, 0 0, 100% 0);
-            z-index: 2;
-            pointer-events: none;
-        }
-        
-        /* Darker green vein detail */
+        /* The "Notch" of the lily pad using a pseudo-element */
         .tile::after {
             content: '';
             position: absolute;
-            width: 80%;
-            height: 80%;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 100, 0, 0.1);
+            top: -2px;
+            right: -2px;
+            width: 15px;
+            height: 15px;
+            background-color: #e0f7fa; /* Match body background to create cut-out effect */
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            transform: rotate(45deg);
+            transform-origin: top left;
             pointer-events: none;
         }
 
         .tile:hover {
             transform: scale(1.05);
             z-index: 10;
-            background-color: #66bb6a;
         }
 
         .tile.revealed {
@@ -106,35 +89,24 @@
             transform: none;
         }
 
+        /* State: Frog Found */
         .tile.frog {
             background-color: #81c784;
         }
-
+        
+        /* State: Empty (Water Drop) */
         .tile.empty {
             background-color: #29b6f6; /* Water blue */
-            border-radius: 50%; /* Water drop shape circle */
-            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.4);
-        }
-        
-        .tile.empty::before {
-            display: none; /* Remove notch for water drop */
-        }
-        
-        .tile.empty::after {
-            display: none; /* Remove vein for water drop */
         }
 
-        /* Ensure emojis are always upright */
-        .tile span {
-            display: block;
-            line-height: 1;
-            transform: rotate(0deg) !important; /* Force upright */
-        }
-
+        /* Victory Screen Overlay */
         #victory-screen {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.85);
             flex-direction: column;
             justify-content: center;
@@ -147,35 +119,32 @@
         #victory-screen h2 {
             font-size: 3rem;
             margin-bottom: 20px;
-            color: #4caf50;
+            color: #81c784;
         }
 
-        #spotify-code {
-            background: white;
+        #victory-screen p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        /* Spotify Code Styling */
+        .spotify-code-container {
+            background-color: #8fbbca; /* Match SVG background */
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255,255,255,0.2);
-            max-width: 90%;
-        }
-
-        #spotify-code svg {
-            width: 400px;
-            height: 100px;
-            display: block;
         }
 
         button {
-            margin-top: 20px;
-            padding: 15px 30px;
+            margin-top: 30px;
+            padding: 10px 20px;
             font-size: 1.2rem;
             background-color: #4caf50;
             color: white;
             border: none;
-            border-radius: 50px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
         }
-
         button:hover {
             background-color: #45a049;
         }
@@ -184,22 +153,24 @@
 </head>
 <body>
 
-    <header>
-        <h1>Find the Frog</h1>
-        <p>Find <span id="frogs-found">0</span> out of <span id="goal-count">10</span> frogs!</p>
-        <p style="font-size: 0.9rem; color: #006064;">(50 frogs hidden in the pond)</p>
-    </header>
+    <h1>Find the Frog!</h1>
+    <div class="stats">
+        Frogs Found: <span id="score">0</span> / 10<br>
+        Attempts: <span id="attempts">0</span>
+    </div>
 
-    <div id="game-container">
-        <div id="grid"></div>
+    <div class="game-container" id="grid">
+        <!-- Grid generated by JS -->
     </div>
 
     <div id="victory-screen">
-        <h2>You Found Them All!</h2>
-        <p>Scan this code to listen to the victory track:</p>
-        <div id="spotify-code">
-            <!-- Your Spotify Code SVG -->
-            <svg width="640" height="160" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <h2>You Won!</h2>
+        <p>You found all the frogs!</p>
+        <p>Scan this code to listen:</p>
+        
+        <div class="spotify-code-container">
+            <!-- Your Provided Spotify Code SVG -->
+            <svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <rect x="0" y="0" width="400" height="100" fill="#8fbbca"/>
                 <rect x="100.00" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="112.42" y="23.50" width="6.71" height="53.00" rx="3.36" ry="3.36" fill="#000000"/>
@@ -224,9 +195,10 @@
                 <rect x="348.44" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="360.87" y="20.00" width="6.71" height="60.00" rx="3.36" ry="3.36" fill="#000000"/>
                 <rect x="373.29" y="44.50" width="6.71" height="11.00" rx="3.36" ry="3.36" fill="#000000"/>
-                <g transform="translate(20,20)"><path fill="#000000" d="M31.1897 0.0240432C14.6347 -0.632948 0.681043 12.2549 0.024052 28.8097C-0.633075 45.3665 12.2553 59.319 28.8103 59.976C45.366 60.633 59.3188 47.7458 59.976 31.1893C60.633 14.6343 47.7453 0.681005 31.1897 0.0240432ZM43.8535 43.9722C43.4793 44.6292 42.7525 44.9595 42.0468 44.8602C41.829 44.8298 41.6135 44.7582 41.4105 44.6427C37.4455 42.3855 33.1242 40.9165 28.5667 40.276C24.0095 39.6355 19.4507 39.8565 15.0169 40.9335C14.0555 41.1667 13.0871 40.5768 12.8536 39.6155C12.6202 38.654 13.2103 37.6857 14.1715 37.452C19.0471 36.2682 24.058 36.0247 29.0655 36.7285C34.073 37.4322 38.8228 39.0475 43.1828 41.5293C44.0425 42.0187 44.3428 43.1125 43.8535 43.9722ZM47.7962 36.0967C47.1842 37.2277 45.771 37.6495 44.6403 37.037C39.9998 34.527 34.9767 32.879 29.7105 32.139C24.4443 31.3988 19.1614 31.5982 14.0087 32.732C13.7298 32.7935 13.4517 32.8022 13.1846 32.7647C12.2487 32.633 11.4492 31.9355 11.2343 30.9585C10.958 29.7025 11.752 28.4602 13.008 28.184C18.7039 26.9305 24.5416 26.7097 30.3585 27.5272C36.1758 28.3447 41.7262 30.1663 46.8558 32.941C47.987 33.5527 48.408 34.9657 47.7962 36.0967ZM52.1663 27.2192C51.5905 28.3263 50.3935 28.9 49.2245 28.7358C48.9105 28.6915 48.5987 28.5942 48.3012 28.4398C42.8988 25.6305 37.0798 23.7731 31.006 22.9195C24.9326 22.0659 18.8271 22.2474 12.8592 23.4587C11.3078 23.7732 9.79528 22.7712 9.48055 21.2201C9.16582 19.669 10.1679 18.1563 11.7191 17.8414C18.3266 16.5002 25.084 16.2991 31.8038 17.2435C38.5238 18.188 44.9642 20.2439 50.9457 23.3543C52.35 24.0846 52.8963 25.815 52.1663 27.2192Z"/></g>
+                <g transform="translate(20,20)"><path fill="#000000" d="M31.1897 0.0240432C14.6347 -0.632948 0.681043 12.2549 0.024052 28.8097C-0.633075 45.3665 12.2553 59.319 28.8103 59.976C45.366 60.633 59.3188 47.7458 59.976 31.1893C60.633 14.6343 47.7453 0.681005 31.1897 0.0240432ZM43.8535 43.9722C43.4793 44.6292 42.7525 44.9595 42.0468 44.8602C41.829 44.8298 41.6135 44.7582 41.4105 44.6427C37.4455 42.3855 33.1242 40.9165 28.5667 40.276C24.0095 39.6355 19.4507 39.8565 15.0169 40.9335C14.0555 41.1667 13.0871 40.5768 12.8536 39.6155C12.6202 38.654 13.2103 37.6857 14.1715 37.452C19.0471 36.2682 24.058 36.0247 29.0655 36.7285C34.073 37.4322 38.8228 39.0475 43.1828 41.5293C44.0425 42.0187 44.3428 43.1125 43.8535 43.9722ZM47.7962 36.0967C47.1842 37.2277 45.771 37.6495 44.6403 37.037C39.9998 34.527 34.9767 32.879 29.7105 32.139C24.4443 31.3988 19.1614 31.5982 14.0087 32.732C13.7298 32.7935 13.4517 32.8022 13.1846 32.7647C12.2487 32.633 11.4492 31.9355 11.2343 30.9585C10.958 29.7025 11.752 28.4602 13.008 28.184C18.7039 26.9305 24.5416 26.7097 30.3585 27.5272C36.1758 28.3447 41.7262 29.0475 46.8558 32.941C47.987 33.5527 48.408 34.9657 47.7962 36.0967ZM52.1663 27.2192C51.5905 28.3263 50.3935 28.9 49.2245 28.7358C48.9105 28.6915 48.5987 28.5942 48.3012 28.4398C42.8988 25.6305 37.0798 23.7731 31.006 22.9195C24.9326 22.0659 18.8271 22.2474 12.8592 23.4587C11.3078 23.7732 9.79528 22.7712 9.48055 21.2201C9.16582 19.669 10.1679 18.1563 11.7191 17.8414C18.3266 16.5002 25.084 16.2991 31.8038 17.2435C38.5238 18.188 44.9642 20.2439 50.9457 23.3543C52.35 24.0846 52.8963 25.815 52.1663 27.2192Z"/></g>
             </svg>
         </div>
+
         <button onclick="location.reload()">Play Again</button>
     </div>
 
@@ -235,66 +207,76 @@
         const COLS = 26;
         const TOTAL_FROGS = 50;
         const GOAL = 10;
-        
+
         let frogsFound = 0;
-        let gameOver = false;
-        let frogLocations = new Set();
+        let attempts = 0;
+        let frogLocations = [];
+        let gameActive = true;
 
         const gridElement = document.getElementById('grid');
-        const frogsFoundElement = document.getElementById('frogs-found');
-        const goalCountElement = document.getElementById('goal-count');
+        const scoreElement = document.getElementById('score');
+        const attemptsElement = document.getElementById('attempts');
         const victoryScreen = document.getElementById('victory-screen');
-
-        goalCountElement.textContent = GOAL;
 
         // Initialize Game
         function initGame() {
-            // Generate random frog locations
-            while (frogLocations.size < TOTAL_FROGS) {
-                const r = Math.floor(Math.random() * ROWS);
-                const c = Math.floor(Math.random() * COLS);
-                frogLocations.add(`${r},${c}`);
+            // Create empty grid array
+            let grid = Array(ROWS * COLS).fill(false);
+
+            // Place frogs randomly
+            let placed = 0;
+            while (placed < TOTAL_FROGS) {
+                let index = Math.floor(Math.random() * (ROWS * COLS));
+                if (!grid[index]) {
+                    grid[index] = true;
+                    frogLocations.push(index);
+                    placed++;
+                }
             }
 
-            // Create Grid
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    const tile = document.createElement('div');
-                    tile.classList.add('tile');
-                    tile.dataset.row = r;
-                    tile.dataset.col = c;
-                    
-                    tile.addEventListener('click', () => handleTileClick(tile, r, c));
-                    gridElement.appendChild(tile);
-                }
+            // Render Grid
+            for (let i = 0; i < ROWS * COLS; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.dataset.index = i;
+                tile.addEventListener('click', handleTileClick);
+                gridElement.appendChild(tile);
             }
         }
 
-        function handleTileClick(tile, r, c) {
-            if (gameOver || tile.classList.contains('revealed')) return;
+        function handleTileClick(e) {
+            if (!gameActive) return;
+            
+            const tile = e.target;
+            
+            // Ignore if already revealed
+            if (tile.classList.contains('revealed')) return;
 
+            attempts++;
+            attemptsElement.textContent = attempts;
             tile.classList.add('revealed');
-            const key = `${r},${c}`;
 
-            if (frogLocations.has(key)) {
+            const index = parseInt(tile.dataset.index);
+
+            if (frogLocations.includes(index)) {
                 // Frog Found
                 tile.classList.add('frog');
-                tile.innerHTML = '<span>🐸</span>';
+                tile.textContent = '🐸';
                 frogsFound++;
-                frogsFoundElement.textContent = frogsFound;
+                scoreElement.textContent = frogsFound;
 
                 if (frogsFound >= GOAL) {
                     endGame();
                 }
             } else {
-                // Empty (Water Drop)
+                // No Frog (Water Drop)
                 tile.classList.add('empty');
-                tile.innerHTML = '<span>💧</span>';
+                tile.textContent = '💧';
             }
         }
 
         function endGame() {
-            gameOver = true;
+            gameActive = false;
             setTimeout(() => {
                 victoryScreen.style.display = 'flex';
             }, 500);
